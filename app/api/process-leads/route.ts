@@ -5,11 +5,19 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-// Internal tool API — single-user, no auth layer needed
-// Assumes requests come from the same Next.js app only
-// In production: protected by Vercel domain isolation
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || "dev-key-change-in-production"
+
+// Internal tool API — validates shared secret between frontend and backend
 export async function POST(request: NextRequest) {
   try {
+    // Validate API key from Authorization header
+    const authHeader = request.headers.get("authorization") || ""
+    const providedKey = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader
+
+    if (providedKey !== INTERNAL_API_KEY) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const body = await request.json()
     const { firstName, lastName, email, jobTitle, company, companyDescription } = body
 

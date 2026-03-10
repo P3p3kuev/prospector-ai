@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && eslint .",
     "test": "tsx __tests__/csv.test.ts && tsx __tests__/api-validation.test.ts"
   },
   "keywords": [
@@ -31,6 +31,7 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "eslint": "^9.0.0",
     "tsx": "^4.21.0"
   }
 }

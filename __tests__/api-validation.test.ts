@@ -4,19 +4,19 @@ console.log("Testing API validation logic...")
 
 // Test the actual validation logic from the route
 
-// Test 1: Origin-based access control (internal tool security)
-function validateOrigin(origin: string | null, host: string | null): boolean {
-  if (origin && !origin.endsWith(host || "")) {
-    return false // Reject external origins
-  }
-  return true // Allow same-origin and no origin (localhost without header)
+// Test 1: API key validation (internal tool security)
+const INTERNAL_API_KEY = "dev-key-change-in-production"
+
+function validateApiKey(authHeader: string): boolean {
+  const providedKey = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader
+  return providedKey === INTERNAL_API_KEY
 }
 
-assert.equal(validateOrigin("http://localhost:3000", "localhost:3000"), true)
-assert.equal(validateOrigin("http://myapp.vercel.app", "myapp.vercel.app"), true)
-assert.equal(validateOrigin("http://evil.com", "localhost:3000"), false)
-assert.equal(validateOrigin(null, "localhost:3000"), true)
-console.log("✓ Origin-based access control")
+assert.equal(validateApiKey("Bearer dev-key-change-in-production"), true)
+assert.equal(validateApiKey("dev-key-change-in-production"), true)
+assert.equal(validateApiKey("Bearer wrong-key"), false)
+assert.equal(validateApiKey(""), false)
+console.log("✓ API key validation")
 
 // Test 2: Required field validation (from route)
 function validateLeadFields(firstName: any, email: any, jobTitle: any, company: any): boolean {

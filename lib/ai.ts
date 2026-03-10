@@ -5,6 +5,7 @@ export async function generateEmails(lead: Lead) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "Authorization": "Bearer dev-key-change-in-production",
     },
     body: JSON.stringify({
       firstName: lead.firstName,
