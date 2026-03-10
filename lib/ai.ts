@@ -2,6 +2,7 @@
 
 import Anthropic from "@anthropic-ai/sdk"
 import { Lead } from "./types"
+import { validateLeadFields, enforceOutputLimits } from "./validation"
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -9,7 +10,7 @@ const client = new Anthropic({
 
 export async function generateEmails(lead: Lead) {
   // Validate required fields
-  if (!lead.firstName || !lead.email || !lead.jobTitle || !lead.company) {
+  if (!validateLeadFields(lead.firstName, lead.email, lead.jobTitle, lead.company)) {
     throw new Error("Missing required fields")
   }
 
@@ -52,14 +53,13 @@ IMPORTANT: Keep emailBody under 120 words. Keep subjectLine under 60 chars.`
   const result = JSON.parse(content.text)
 
   // Enforce output limits
-  const subjectLine = (result.subjectLine || "").slice(0, 60)
-  const emailBody = (result.emailBody || "").split(" ").slice(0, 120).join(" ")
+  const limits = enforceOutputLimits(result.subjectLine || "", result.emailBody || "")
 
   return {
     companyContext: result.companyContext || "",
     painPoint: result.painPoint || "",
     personalizationHook: result.personalizationHook || "",
-    subjectLine,
-    emailBody,
+    subjectLine: limits.subject,
+    emailBody: limits.body,
   }
 }
