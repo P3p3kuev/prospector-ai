@@ -28,25 +28,24 @@
 
 ---
 
-## Next Steps (Minimal & Lean)
+## Next Steps
 
-1. **MVP Prototype**
-   - [ ] Single `page.tsx` with upload form
-   - [ ] CSV parser (detect required columns: firstName, email, jobTitle, company)
-   - [ ] API endpoint `/api/process-leads` for Claude calls (sequential)
-   - [ ] Table showing results with inline editing
-   - [ ] Export button (Groove-compatible CSV)
+1. **Test & Refine (Session 2)**
+   - [ ] Test with real Cognism CSV data
+   - [ ] Verify Claude API output quality
+   - [ ] Refine email generation prompts if needed
+   - [ ] Test edge cases (empty file, malformed CSV, API errors)
+   - [ ] Validate inline editing and export functionality
 
-2. **Testing & Deploy**
-   - [ ] Test with sample Cognism CSV
-   - [ ] Handle API errors gracefully
-   - [ ] Build and deploy to Vercel
+2. **Deploy to Vercel**
+   - [ ] Push to production
+   - [ ] Set up environment variables in Vercel
 
-3. **After V1**
-   - Batch/streaming for speed
-   - Persistent storage
+3. **Future Enhancements (V2+)**
+   - Batch/streaming API calls for speed
+   - Persistent database (if user requests session retention)
    - User accounts
-   - Direct integrations
+   - Direct email tool integrations
 
 ---
 
@@ -63,10 +62,14 @@
 ## Session Log
 
 **March 10, 2026 — Session 1**
-- Created Vision Document
-- Updated CLAUDE.md (lean, desktop-first, no auth/no database)
-- Fixed Tailwind CSS setup (downgraded to v3 for stability)
-- Moved project to dedicated folder: `/c/Users/giuse/projects/prospector-ai/`
-- Initialized complete Next.js project with all core features
-- Build passes ✓ Dev server ready ✓
-- Next: Test with sample CSV data and refine prompts
+- Created Vision Document and project CLAUDE.md
+- Initialized Next.js 15 + TypeScript + Tailwind v3 project
+- Implemented all core features:
+  - CSV upload and validation (required: firstName, email, jobTitle, company)
+  - Claude API integration for sequential email generation
+  - Interactive table with inline editing
+  - CSV export (Groove-compatible)
+- Build passes: `npm run build` ✓
+- Dev server ready: `npm run dev` ✓
+- Code on GitHub: https://github.com/P3p3kuev/prospector-ai (main branch)
+- Ready for: Testing with real data and prompt refinement
