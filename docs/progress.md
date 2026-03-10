@@ -23,6 +23,7 @@
 
 ## In Progress
 
+- [ ] Code review of initial commit
 - [ ] Testing with sample CSV
 - [ ] Fine-tune Claude prompts for output quality
 
