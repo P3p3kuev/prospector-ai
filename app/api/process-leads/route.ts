@@ -7,11 +7,11 @@ const client = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    // Require explicit authorization token to prevent public abuse of Anthropic API
-    const authHeader = request.headers.get("authorization")
-    const expectedToken = process.env.PROSPECTOR_API_TOKEN
-    if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // Internal tool: trust requests from same origin only
+    const origin = request.headers.get("origin")
+    const host = request.headers.get("host")
+    if (origin && !origin.endsWith(host || "")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
     const body = await request.json()

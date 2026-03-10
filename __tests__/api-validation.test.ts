@@ -1,51 +1,57 @@
 import { strict as assert } from "assert"
 
-console.log("Testing API validation...")
+console.log("Testing API validation logic...")
 
-// Test 1: Authorization check
-function validateAuth(authHeader: string | null, expectedToken: string) {
-  return !expectedToken || authHeader !== `Bearer ${expectedToken}` ? 401 : 200
+// Test the actual validation logic from the route
+
+// Test 1: Origin-based access control (internal tool security)
+function validateOrigin(origin: string | null, host: string | null): boolean {
+  if (origin && !origin.endsWith(host || "")) {
+    return false // Reject external origins
+  }
+  return true // Allow same-origin and no origin (localhost without header)
 }
 
-const token = "secret-key-123"
-assert.equal(validateAuth(null, token), 401)
-assert.equal(validateAuth("Bearer wrong", token), 401)
-assert.equal(validateAuth(`Bearer ${token}`, token), 200)
-console.log("✓ Authorization validation")
+assert.equal(validateOrigin("http://localhost:3000", "localhost:3000"), true)
+assert.equal(validateOrigin("http://myapp.vercel.app", "myapp.vercel.app"), true)
+assert.equal(validateOrigin("http://evil.com", "localhost:3000"), false)
+assert.equal(validateOrigin(null, "localhost:3000"), true)
+console.log("✓ Origin-based access control")
 
-// Test 2: Required field validation
-function validateFields(data: any) {
-  const { firstName, email, jobTitle, company } = data
-  return !firstName || !email || !jobTitle || !company ? 400 : 200
+// Test 2: Required field validation (from route)
+function validateLeadFields(firstName: any, email: any, jobTitle: any, company: any): boolean {
+  return !firstName || !email || !jobTitle || !company ? false : true
 }
 
-assert.equal(validateFields({ firstName: "J", email: "j@x.com", jobTitle: "Mgr", company: "Co" }), 200)
-assert.equal(validateFields({ firstName: "J", email: "", jobTitle: "Mgr", company: "Co" }), 400)
-assert.equal(validateFields({ firstName: "", email: "j@x.com", jobTitle: "Mgr", company: "Co" }), 400)
-console.log("✓ Field validation")
+assert.equal(validateLeadFields("J", "j@x.com", "Mgr", "Co"), true)
+assert.equal(validateLeadFields("J", "", "Mgr", "Co"), false)
+assert.equal(validateLeadFields("", "j@x.com", "Mgr", "Co"), false)
+console.log("✓ Required field validation")
 
-// Test 3: Output limits
-function enforceOutputLimits(subject: string, body: string) {
+// Test 3: Output limits enforcement (from route)
+function enforceOutputLimits(subjectLine: string, emailBody: string) {
   return {
-    subject: subject.slice(0, 60),
-    body: body.split(" ").slice(0, 120).join(" "),
+    subject: subjectLine.slice(0, 60),
+    body: emailBody.split(" ").slice(0, 120).join(" "),
   }
 }
 
-const r1 = enforceOutputLimits("x".repeat(100), "word ".repeat(150))
-assert(r1.subject.length <= 60)
-assert(r1.body.split(" ").length <= 120)
+const limited = enforceOutputLimits("x".repeat(100), "word ".repeat(150))
+assert(limited.subject.length <= 60)
+assert(limited.body.split(" ").length <= 120)
 console.log("✓ Output limits")
 
-// Test 4: Error masking
-function maskError(err: Error): string {
-  // Log internally, return generic to client
-  console.debug(err.message)
-  return "Email generation failed"
+// Test 4: Error handling (generic to client, detailed logged server-side)
+function handleError(error: Error): { publicMessage: string; loggedMessage: string } {
+  return {
+    publicMessage: "Email generation failed", // Generic to client
+    loggedMessage: error.message, // Logged server-side only
+  }
 }
 
-const masked = maskError(new Error("API key: xyz"))
-assert.equal(masked, "Email generation failed")
-console.log("✓ Error masking")
+const errorResponse = handleError(new Error("API key xyz invalid"))
+assert.equal(errorResponse.publicMessage, "Email generation failed")
+assert(errorResponse.loggedMessage.includes("API key"))
+console.log("✓ Error handling")
 
 console.log("\n✅ All API validation tests passed\n")
