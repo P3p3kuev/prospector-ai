@@ -186,8 +186,13 @@ export default function Home() {
                     </button>
                   )}
                   <button
-                    onClick={() => setLeads([])}
-                    className="px-6 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700"
+                    onClick={() => {
+                      if (confirm("Clear all leads? This cannot be undone.")) {
+                        setLeads([])
+                      }
+                    }}
+                    disabled={isProcessing}
+                    className="px-6 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 disabled:bg-gray-400"
                   >
                     Clear
                   </button>

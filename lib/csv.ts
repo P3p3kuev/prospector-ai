@@ -1,15 +1,15 @@
 import { Lead } from "./types"
 
 export function parseCSV(csvText: string): Lead[] {
-  const lines = csvText.split("\n").map((line) => line.trim()).filter(Boolean)
+  // Parse entire CSV respecting quoted fields (handles multi-line cells)
+  const rows = parseCSVRows(csvText)
 
-  if (lines.length < 2) {
+  if (rows.length < 2) {
     throw new Error("CSV file must have a header row and at least one data row")
   }
 
   // Parse header
-  const headerLine = lines[0]
-  const headers = parseCSVLine(headerLine).map((h) => h.toLowerCase().trim())
+  const headers = rows[0].map((h) => h.toLowerCase().trim())
 
   // Find required column indices
   const findColumnIndex = (names: string[]) => {
@@ -41,8 +41,8 @@ export function parseCSV(csvText: string): Lead[] {
 
   // Parse data rows
   const leads: Lead[] = []
-  for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVLine(lines[i])
+  for (let i = 1; i < rows.length; i++) {
+    const values = rows[i]
 
     const firstName = (values[firstNameIdx] || "").trim()
     const lastName = lastNameIdx !== -1 ? (values[lastNameIdx] || "").trim() : ""
@@ -82,6 +82,44 @@ export function parseCSV(csvText: string): Lead[] {
   return leads
 }
 
+// Parse entire CSV text, respecting quoted fields with newlines
+function parseCSVRows(csvText: string): string[][] {
+  const rows: string[][] = []
+  let current = ""
+  let insideQuotes = false
+
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i]
+    const nextChar = csvText[i + 1]
+
+    if (char === '"') {
+      if (insideQuotes && nextChar === '"') {
+        current += '"'
+        i++
+      } else {
+        insideQuotes = !insideQuotes
+      }
+      current += char
+    } else if (char === "\n" && !insideQuotes) {
+      // Row boundary
+      const row = parseCSVLine(current.trim())
+      if (row.some((cell) => cell.length > 0)) {
+        rows.push(row)
+      }
+      current = ""
+    } else {
+      current += char
+    }
+  }
+
+  // Final row
+  if (current.trim()) {
+    rows.push(parseCSVLine(current.trim()))
+  }
+
+  return rows
+}
+
 function parseCSVLine(line: string): string[] {
   const result: string[] = []
   let current = ""
@@ -99,13 +137,13 @@ function parseCSVLine(line: string): string[] {
         insideQuotes = !insideQuotes
       }
     } else if (char === "," && !insideQuotes) {
-      result.push(current)
+      result.push(current.trim())
       current = ""
     } else {
       current += char
     }
   }
 
-  result.push(current)
+  result.push(current.trim())
   return result
 }
