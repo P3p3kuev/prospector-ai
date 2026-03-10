@@ -5,6 +5,7 @@ export async function generateEmails(lead: Lead) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.NEXT_PUBLIC_PROSPECTOR_API_TOKEN}`,
     },
     body: JSON.stringify({
       firstName: lead.firstName,

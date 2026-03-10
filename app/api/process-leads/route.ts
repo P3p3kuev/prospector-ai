@@ -7,10 +7,11 @@ const client = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    // Minimal protection: reject requests from public internet
-    const origin = request.headers.get("origin") || request.headers.get("referer")
-    if (origin && !origin.includes("localhost") && !origin.includes(process.env.VERCEL_URL || "")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    // Require explicit authorization token to prevent public abuse of Anthropic API
+    const authHeader = request.headers.get("authorization")
+    const expectedToken = process.env.PROSPECTOR_API_TOKEN
+    if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const body = await request.json()
