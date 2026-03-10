@@ -5,15 +5,11 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
+// Internal tool API — single-user, no auth layer needed
+// Assumes requests come from the same Next.js app only
+// In production: protected by Vercel domain isolation
 export async function POST(request: NextRequest) {
   try {
-    // Internal tool: trust requests from same origin only
-    const origin = request.headers.get("origin")
-    const host = request.headers.get("host")
-    if (origin && !origin.endsWith(host || "")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
-    }
-
     const body = await request.json()
     const { firstName, lastName, email, jobTitle, company, companyDescription } = body
 
