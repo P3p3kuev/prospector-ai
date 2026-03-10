@@ -69,4 +69,5 @@
 - Moved project to dedicated folder: `/c/Users/giuse/projects/prospector-ai/`
 - Initialized complete Next.js project with all core features
 - Build passes ✓ Dev server ready ✓
+- Created GitHub repo and PR #2
 - Next: Test with sample CSV data and refine prompts
