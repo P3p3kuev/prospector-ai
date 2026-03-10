@@ -70,3 +70,10 @@
 - Initialized complete Next.js project with all core features
 - Build passes ✓ Dev server ready ✓
 - Next: Test with sample CSV data and refine prompts
+## Testing Checklist
+
+- [ ] Upload sample Cognism CSV
+- [ ] Verify Claude API integration
+- [ ] Test inline editing
+- [ ] Export CSV format
+- [ ] Error handling
