@@ -8,7 +8,8 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-export async function generateEmails(lead: Lead) {
+// Core logic (exported for testing with injected client)
+export async function generateEmailsCore(lead: Lead, anthropicClient: Anthropic) {
   // Validate required fields
   if (!validateLeadFields(lead.firstName, lead.email, lead.jobTitle, lead.company)) {
     throw new Error("Missing required fields")
@@ -34,7 +35,7 @@ Generate ONLY a JSON response with NO markdown, NO code blocks, just raw JSON:
 
 IMPORTANT: Keep emailBody under 120 words. Keep subjectLine under 60 chars.`
 
-  const message = await client.messages.create({
+  const message = await anthropicClient.messages.create({
     model: "claude-3-5-sonnet-20241022",
     max_tokens: 500,
     messages: [
@@ -62,4 +63,9 @@ IMPORTANT: Keep emailBody under 120 words. Keep subjectLine under 60 chars.`
     subjectLine: limits.subject,
     emailBody: limits.body,
   }
+}
+
+// Server Action wrapper
+export async function generateEmails(lead: Lead) {
+  return generateEmailsCore(lead, client)
 }
